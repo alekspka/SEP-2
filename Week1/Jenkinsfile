@@ -1,19 +1,22 @@
 pipeline {
     agent any
-     environment {
-            // Define Docker Hub credentials ID
-            DOCKERHUB_CREDENTIALS_ID = 'Docker_Hub'
-            // Define Docker Hub repository name
-            DOCKERHUB_REPO = 'alekspka/shoppingcart'
-            // Define Docker image tag
-            DOCKER_IMAGE_TAG = 'latest'
-        }
+
+    environment {
+        // Define Docker Hub credentials ID
+        DOCKERHUB_CREDENTIALS_ID = 'Docker_hub'
+        // Define Docker Hub repository name
+        DOCKERHUB_REPO = 'alekspka/shoppingcart'
+        // Define Docker image tag
+        DOCKER_IMAGE_TAG = 'latest'
+    }
+
     stages {
         stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/alekspka/SEP-2'
             }
         }
+
         stage('Build') {
             steps {
                 dir('Week1') {
@@ -21,6 +24,7 @@ pipeline {
                 }
             }
         }
+
         stage('Test') {
             steps {
                 dir('Week1') {
@@ -28,6 +32,7 @@ pipeline {
                 }
             }
         }
+
         stage('Code Coverage') {
             steps {
                 dir('Week1') {
@@ -35,34 +40,37 @@ pipeline {
                 }
             }
         }
+
         stage('Publish Test Results') {
             steps {
                 junit '**/target/surefire-reports/*.xml'
             }
         }
+
         stage('Publish Coverage Report') {
             steps {
                 jacoco()
             }
         }
 
-         stage('Build Docker Image') {
-                    steps {
-                        // Build Docker image
-                        script {
-                            docker.build("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}", "Week1")
-                        }
-                    }
+        stage('Build Docker Image') {
+            steps {
+                // Build Docker image from Week1 directory
+                bat 'docker build -t %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG% Week1'
+            }
+        }
+
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                // Login, push and logout using Jenkins credentials binding
+                withCredentials([usernamePassword(credentialsId: DOCKERHUB_CREDENTIALS_ID, usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
+                    bat '''
+                    echo %DOCKERHUB_PASS%| docker login -u %DOCKERHUB_USER% --password-stdin
+                    docker push %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG%
+                    docker logout
+                    '''
                 }
-                stage('Push Docker Image to Docker Hub') {
-                    steps {
-                        // Push Docker image to Docker Hub
-                        script {
-                            docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS_ID) {
-                                docker.image("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}").push()
-                            }
-                        }
-                    }
-                }
+            }
+        }
     }
 }
