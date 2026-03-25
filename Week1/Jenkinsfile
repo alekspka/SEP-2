@@ -11,7 +11,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/ADirin/SEP2_Week1_lectureDemo.git'
+                git 'https://github.com/alekspka/SEP-2'
             }
         }
         stage('Build') {
