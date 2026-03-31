@@ -15,7 +15,7 @@ public class ShoppingCart {
         items = new ArrayList<>();
     }
 
-    class Item {
+    public class Item {
         String product;
         double price;
         int quantity;
@@ -24,6 +24,10 @@ public class ShoppingCart {
             this.product = product;
             this.price = price;
             this.quantity = quantity;
+        }
+
+        public double calculateCost() {
+            return price * quantity;
         }
     }
 
@@ -34,7 +38,7 @@ public class ShoppingCart {
     public double calculateTotal() {
         double total = 0;
         for (Item item : items) {
-            total += item.price * item.quantity;
+            total += item.calculateCost();
         }
         return total;
     }

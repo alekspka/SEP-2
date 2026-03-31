@@ -7,6 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ShoppingCartTest {
 
     @Test
+    public void itemCalculateCostReturnsPriceTimesQuantity() {
+        ShoppingCart cart = new ShoppingCart();
+        ShoppingCart.Item item = cart.new Item("Apple", 2.5, 4);
+
+        assertEquals(10.0, item.calculateCost(), 0.0001);
+    }
+
+    @Test
     public void calculateTotalReturnsZeroForEmptyCart() {
         ShoppingCart cart = new ShoppingCart();
 
