@@ -18,8 +18,8 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.Parent;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -32,6 +32,9 @@ import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
 public class ShoppingCartGUI extends Application {
+
+
+    private static final String STUDENT_NAME = "Aleksi Kaasalainen";
 
     private static final class LanguageOption {
         private final String label;
@@ -221,10 +224,10 @@ public class ShoppingCartGUI extends Application {
         panel.setPadding(new Insets(5));
 
         lblTotalLabel = new Label();
-        lblTotalLabel.setFont(Font.font(14));
+        lblTotalLabel.setStyle("-fx-font-size: 14px;");
         lblTotalValue = new Label("0.00");
         lblTotalValue.setTextFill(Color.DARKGREEN);
-        lblTotalValue.setFont(Font.font(14));
+        lblTotalValue.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
         panel.getChildren().addAll(lblTotalLabel, lblTotalValue);
         return panel;
@@ -240,7 +243,7 @@ public class ShoppingCartGUI extends Application {
     }
 
     private void applyLocale() {
-        stage.setTitle(rb.getString("appTitle"));
+        stage.setTitle(rb.getString("appTitle") + " — " + STUDENT_NAME);
         lblLanguage.setText(rb.getString("selectLanguage"));
         lblProduct.setText(rb.getString("product"));
         lblPrice.setText(rb.getString("price"));
@@ -258,9 +261,27 @@ public class ShoppingCartGUI extends Application {
         NodeOrientation orientation = isArabic
                 ? NodeOrientation.RIGHT_TO_LEFT
                 : NodeOrientation.LEFT_TO_RIGHT;
-        stage.getScene().getRoot().setNodeOrientation(orientation);
+        Parent root = (Parent) stage.getScene().getRoot();
+        root.setNodeOrientation(orientation);
+        root.setStyle(localeAwareFontStyle());
 
         refreshTotal();
+    }
+
+    /**
+     * Container images often ship without CJK/Arabic fonts; Docker installs Noto.
+     * On Windows/macOS, fallbacks still help when the default UI font lacks glyphs.
+     */
+    private String localeAwareFontStyle() {
+        String lang = currentLocale.getLanguage();
+        String families = switch (lang) {
+            case "ja" -> "'Noto Sans CJK JP', 'Yu Gothic UI', 'Meiryo', 'MS UI Gothic', sans-serif";
+            case "ko" -> "'Noto Sans CJK KR', 'Malgun Gothic', sans-serif";
+            case "zh" -> "'Noto Sans CJK SC', 'Noto Sans CJK TC', 'Microsoft YaHei', sans-serif";
+            case "ar" -> "'Noto Sans Arabic', 'Noto Naskh Arabic', 'Segoe UI', sans-serif";
+            default -> "sans-serif";
+        };
+        return "-fx-font-family: " + families + ";";
     }
 
     private void addItem() {

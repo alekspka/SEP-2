@@ -15,7 +15,7 @@ public class ShoppingCart {
         items = new ArrayList<>();
     }
 
-    public class Item {
+    class Item {
         String product;
         double price;
         int quantity;
