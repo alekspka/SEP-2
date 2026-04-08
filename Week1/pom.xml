@@ -51,7 +51,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Shade Plugin for creating fat JAR with all dependencies -->
+            <!-- Optional fat JAR (classifier "fat"); main artifact stays thin for JavaFX module-path runs -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -63,12 +63,34 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <finalName>shoppingcart-fat</finalName>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <classifier>fat</classifier>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>org.example.ShoppingCartGUI</mainClass>
                                 </transformer>
                             </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Runtime JARs for Docker: JavaFX on module path (see Dockerfile ENTRYPOINT) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.8.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-runtime-libs</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                            <includeScope>compile</includeScope>
                         </configuration>
                     </execution>
                 </executions>
@@ -85,7 +107,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.12</version>
+                <version>0.8.13</version>
                 <executions>
                     <execution>
                         <goals>
@@ -133,25 +155,37 @@
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-base</artifactId>
             <version>${javafx.version}</version>
+<<<<<<< HEAD
             <classifier>win</classifier>
+=======
+>>>>>>> 109180f96bcdf8e5895f56cb1422cc7919aecf24
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>${javafx.version}</version>
+<<<<<<< HEAD
             <classifier>win</classifier>
+=======
+>>>>>>> 109180f96bcdf8e5895f56cb1422cc7919aecf24
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-graphics</artifactId>
             <version>${javafx.version}</version>
+<<<<<<< HEAD
             <classifier>win</classifier>
+=======
+>>>>>>> 109180f96bcdf8e5895f56cb1422cc7919aecf24
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
             <version>${javafx.version}</version>
+<<<<<<< HEAD
             <classifier>win</classifier>
+=======
+>>>>>>> 109180f96bcdf8e5895f56cb1422cc7919aecf24
         </dependency>
     </dependencies>
 </project>
