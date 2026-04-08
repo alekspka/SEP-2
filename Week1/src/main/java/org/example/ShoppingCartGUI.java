@@ -27,7 +27,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
@@ -69,6 +71,7 @@ public class ShoppingCartGUI extends Application {
 
     private Locale currentLocale = new Locale("en", "US");
     private ResourceBundle rb;
+    private Map<String, String> strings = new HashMap<>();
     private NumberFormat currencyFormatter;
     private final ShoppingCart cart = new ShoppingCart();
 
@@ -80,6 +83,7 @@ public class ShoppingCartGUI extends Application {
     private Label lblQuantity;
     private Button btnAdd;
     private Button btnClear;
+    private Button btnSave;
     private Label lblTotalLabel;
     private Label lblTotalValue;
 
@@ -226,11 +230,33 @@ public class ShoppingCartGUI extends Application {
         lblTotalValue.setTextFill(Color.DARKGREEN);
         lblTotalValue.setFont(Font.font(14));
 
-        panel.getChildren().addAll(lblTotalLabel, lblTotalValue);
+        btnSave = new Button();
+        btnSave.setOnAction(e -> saveCart());
+
+        panel.getChildren().addAll(lblTotalLabel, lblTotalValue, btnSave);
         return panel;
     }
 
+    private void saveCart() {
+        if (cart.getItems().isEmpty()) {
+            showWarning(msg("errorNoProduct"));
+            return;
+        }
+        String lang = currentLocale.getLanguage() + "_" + currentLocale.getCountry();
+        CartService.saveCart(cart.getItems().size(), cart.calculateTotal(), lang, cart.getItems());
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Saved");
+        alert.setHeaderText(null);
+        alert.setContentText("Cart saved to database!");
+        alert.showAndWait();
+        cart.clear();
+        itemTable.getItems().clear();
+        refreshTotal();
+    }
+
     private void loadBundle() {
+        String langTag = currentLocale.getLanguage() + "_" + currentLocale.getCountry();
+        strings = LocalizationService.loadStrings(langTag);
         try {
             rb = ResourceBundle.getBundle("messages", currentLocale, UTF8_CONTROL);
         } catch (Exception e) {
@@ -239,20 +265,26 @@ public class ShoppingCartGUI extends Application {
         currencyFormatter = NumberFormat.getCurrencyInstance(currentLocale);
     }
 
-    private void applyLocale() {
-        stage.setTitle(rb.getString("appTitle"));
-        lblLanguage.setText(rb.getString("selectLanguage"));
-        lblProduct.setText(rb.getString("product"));
-        lblPrice.setText(rb.getString("price"));
-        lblQuantity.setText(rb.getString("quantity"));
-        btnAdd.setText(rb.getString("addButton"));
-        btnClear.setText(rb.getString("clearButton"));
-        lblTotalLabel.setText(rb.getString("totalLabel"));
+    private String msg(String key) {
+        if (strings.containsKey(key)) return strings.get(key);
+        try { return rb.getString(key); } catch (Exception e) { return key; }
+    }
 
-        colProduct.setText(rb.getString("colProduct"));
-        colPrice.setText(rb.getString("colPrice"));
-        colQuantity.setText(rb.getString("colQuantity"));
-        colSubtotal.setText(rb.getString("colSubtotal"));
+    private void applyLocale() {
+        stage.setTitle(msg("appTitle"));
+        lblLanguage.setText(msg("selectLanguage"));
+        lblProduct.setText(msg("product"));
+        lblPrice.setText(msg("price"));
+        lblQuantity.setText(msg("quantity"));
+        btnAdd.setText(msg("addButton"));
+        btnClear.setText(msg("clearButton"));
+        btnSave.setText(msg("saveButton"));
+        lblTotalLabel.setText(msg("totalLabel"));
+
+        colProduct.setText(msg("colProduct"));
+        colPrice.setText(msg("colPrice"));
+        colQuantity.setText(msg("colQuantity"));
+        colSubtotal.setText(msg("colSubtotal"));
 
         boolean isArabic = "ar".equals(currentLocale.getLanguage());
         NodeOrientation orientation = isArabic
@@ -266,7 +298,7 @@ public class ShoppingCartGUI extends Application {
     private void addItem() {
         String product = txtProduct.getText().trim();
         if (product.isEmpty()) {
-            showWarning(rb.getString("errorNoProduct"));
+            showWarning(msg("errorNoProduct"));
             txtProduct.requestFocus();
             return;
         }
@@ -278,7 +310,7 @@ public class ShoppingCartGUI extends Application {
                 throw new NumberFormatException();
             }
         } catch (NumberFormatException ex) {
-            showWarning(rb.getString("errorInvalidPrice"));
+            showWarning(msg("errorInvalidPrice"));
             txtPrice.requestFocus();
             return;
         }
@@ -301,7 +333,7 @@ public class ShoppingCartGUI extends Application {
 
     private void showWarning(String content) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle(rb.getString("errorTitle"));
+        alert.setTitle(msg("errorTitle"));
         alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();

@@ -35,6 +35,14 @@ public class ShoppingCart {
         items.add(item);
     }
 
+    public java.util.List<Item> getItems() {
+        return items;
+    }
+
+    public void clear() {
+        items.clear();
+    }
+
     public double calculateTotal() {
         double total = 0;
         for (Item item : items) {
