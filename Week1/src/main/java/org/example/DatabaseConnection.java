@@ -14,3 +14,8 @@ public class DatabaseConnection {
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 }
+
+@FunctionalInterface
+interface SqlConnectionSupplier {
+    Connection getConnection() throws SQLException;
+}

@@ -35,7 +35,6 @@ import java.util.ResourceBundle;
 
 public class ShoppingCartGUI extends Application {
 
-
     private static final String STUDENT_NAME = "Aleksi Kaasalainen";
 
     private static final class LanguageOption {
@@ -268,25 +267,13 @@ public class ShoppingCartGUI extends Application {
         currencyFormatter = NumberFormat.getCurrencyInstance(currentLocale);
     }
 
-<<<<<<< HEAD
     private String msg(String key) {
         if (strings.containsKey(key)) return strings.get(key);
         try { return rb.getString(key); } catch (Exception e) { return key; }
     }
-=======
-    private void applyLocale() {
-        stage.setTitle(rb.getString("appTitle") + " — " + STUDENT_NAME);
-        lblLanguage.setText(rb.getString("selectLanguage"));
-        lblProduct.setText(rb.getString("product"));
-        lblPrice.setText(rb.getString("price"));
-        lblQuantity.setText(rb.getString("quantity"));
-        btnAdd.setText(rb.getString("addButton"));
-        btnClear.setText(rb.getString("clearButton"));
-        lblTotalLabel.setText(rb.getString("totalLabel"));
->>>>>>> 109180f96bcdf8e5895f56cb1422cc7919aecf24
 
     private void applyLocale() {
-        stage.setTitle(msg("appTitle"));
+        stage.setTitle(msg("appTitle") + " — " + STUDENT_NAME);
         lblLanguage.setText(msg("selectLanguage"));
         lblProduct.setText(msg("product"));
         lblPrice.setText(msg("price"));
@@ -305,7 +292,7 @@ public class ShoppingCartGUI extends Application {
         NodeOrientation orientation = isArabic
                 ? NodeOrientation.RIGHT_TO_LEFT
                 : NodeOrientation.LEFT_TO_RIGHT;
-        Parent root = (Parent) stage.getScene().getRoot();
+        Parent root = stage.getScene().getRoot();
         root.setNodeOrientation(orientation);
         root.setStyle(localeAwareFontStyle());
 

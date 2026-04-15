@@ -13,6 +13,10 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <javafx.version>21.0.5</javafx.version>
+        <sonar.projectKey>Shoppingcart</sonar.projectKey>
+        <sonar.host.url>http://localhost:9000</sonar.host.url>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.exclusions>src/main/java/org/example/ShoppingCartGUI.java,src/main/java/org/example/DatabaseConnection.java,src/main/java/org/example/CartService.java,src/main/java/org/example/LocalizationService.java</sonar.coverage.exclusions>
     </properties>
 
     <build>
@@ -64,7 +68,7 @@
                         </goals>
                         <configuration>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <classifier>fat</classifier>
+
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
@@ -108,6 +112,14 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.13</version>
+                <configuration>
+                    <excludes>
+                        <exclude>org/example/ShoppingCartGUI*</exclude>
+                        <exclude>org/example/DatabaseConnection*</exclude>
+                        <exclude>org/example/CartService*</exclude>
+                        <exclude>org/example/LocalizationService*</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
@@ -150,42 +162,30 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- JavaFX: standard modules only (no classifier) -->
+        <!-- JavaFX: Windows-native artifacts -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-base</artifactId>
             <version>${javafx.version}</version>
-<<<<<<< HEAD
             <classifier>win</classifier>
-=======
->>>>>>> 109180f96bcdf8e5895f56cb1422cc7919aecf24
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>${javafx.version}</version>
-<<<<<<< HEAD
             <classifier>win</classifier>
-=======
->>>>>>> 109180f96bcdf8e5895f56cb1422cc7919aecf24
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-graphics</artifactId>
             <version>${javafx.version}</version>
-<<<<<<< HEAD
             <classifier>win</classifier>
-=======
->>>>>>> 109180f96bcdf8e5895f56cb1422cc7919aecf24
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
             <version>${javafx.version}</version>
-<<<<<<< HEAD
             <classifier>win</classifier>
-=======
->>>>>>> 109180f96bcdf8e5895f56cb1422cc7919aecf24
         </dependency>
     </dependencies>
 </project>
