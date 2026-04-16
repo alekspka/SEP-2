@@ -1,15 +1,15 @@
 pipeline {
     agent any
 
-    environment {
-        // Define Docker Hub credentials ID
-        DOCKERHUB_CREDENTIALS_ID = 'Docker_hub'
-        // Define Docker Hub repository name
-        DOCKERHUB_REPO = 'alekspka/shoppingcart'
-        // Define Docker image tag
-        DOCKER_IMAGE_TAG = 'latest'
+    tools {
+        maven 'Maven3'
     }
 
+    environment {
+        DOCKERHUB_CREDENTIALS_ID = 'Docker_hub'
+        DOCKERHUB_REPO = 'alekspka/shoppingcart'
+        DOCKER_IMAGE_TAG = 'latest'
+    }
     stages {
         stage('Checkout') {
             steps {
@@ -17,52 +17,57 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build and Test') {
             steps {
                 dir('Week1') {
-                    bat 'mvn clean install'
-                }
-            }
-        }
-
-        stage('Test') {
-            steps {
-                dir('Week1') {
-                    bat 'mvn test'
-                }
-            }
-        }
-
-        stage('Code Coverage') {
-            steps {
-                dir('Week1') {
-                    bat 'mvn org.jacoco:jacoco-maven-plugin:0.8.13:report'
+                    bat 'where java'
+                    bat 'java -version'
+                    bat 'mvn -version'
+                    bat 'mvn clean verify'
                 }
             }
         }
 
         stage('Publish Test Results') {
             steps {
-                junit '**/target/surefire-reports/*.xml'
+                junit 'Week1/target/surefire-reports/*.xml'
             }
         }
 
         stage('Publish Coverage Report') {
             steps {
-                jacoco()
+                jacoco(
+                    execPattern: 'Week1/target/jacoco.exec',
+                    classPattern: 'Week1/target/classes',
+                    sourcePattern: 'Week1/src/main/java',
+                    inclusionPattern: '**/*.class'
+                )
             }
         }
 
+        stage('SonarQube Analysis') {
+            steps {
+                dir('Week1') {
+                    withSonarQubeEnv('SonarQubeServer') {
+                        withCredentials([string(credentialsId: 'SONAR', variable: 'SONAR_TOKEN')]) {
+                            bat 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar -Dsonar.projectKey=Shoppingcart -Dsonar.projectName=Shoppingcart -Dsonar.token=%SONAR_TOKEN%'
+                        }
+                    }
+                }
+            }
+        }
+
+
         stage('Build Docker Image') {
             steps {
-                // Build Docker image from Week1 directory
-                bat 'docker build -t %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG% Week1'
+                dir('Week1') {
+                    bat 'docker build -t %DOCKERHUB_REPO%:%DOCKER_IMAGE_TAG% .'
+                }
             }
         }
 
         stage('Push Docker Image to Docker Hub') {
             steps {
-                // Login, push and logout using Jenkins credentials binding
                 withCredentials([usernamePassword(credentialsId: DOCKERHUB_CREDENTIALS_ID, usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
                     bat '''
                     echo %DOCKERHUB_PASS%| docker login -u %DOCKERHUB_USER% --password-stdin
@@ -71,6 +76,15 @@ pipeline {
                     '''
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+        failure {
+            echo 'Pipeline failed.'
         }
     }
 }

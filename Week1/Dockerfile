@@ -21,6 +21,10 @@ COPY . /app/
 
 RUN mvn -q -DskipTests clean package
 
-# JavaFX is modular: put OpenJFX JARs on the module path, thin app JAR on the class path.
+# Keep only Linux JavaFX modules on the module path; Windows jars cause duplicate-module errors.
+RUN mkdir -p /app/target/javafx-lib \
+    && find /app/target/lib -maxdepth 1 -type f -name 'javafx-*-linux.jar' -exec cp {} /app/target/javafx-lib/ \;
+
+# JavaFX is modular: put Linux OpenJFX JARs on the module path, keep app/runtime deps on the class path.
 # Do not use "java -jar" alone — it will not load javafx.* modules.
-ENTRYPOINT ["sh", "-c", "exec java -p /app/target/lib --add-modules javafx.controls,javafx.fxml -cp /app/target/shoppingcart-1.0.jar org.example.ShoppingCartGUI"]
+ENTRYPOINT ["sh", "-c", "exec java -p /app/target/javafx-lib --add-modules javafx.controls,javafx.fxml -cp '/app/target/shoppingcart-1.0.jar:/app/target/lib/*' org.example.ShoppingCartGUI"]
